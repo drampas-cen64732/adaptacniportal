@@ -1,0 +1,2662 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Martinův adaptační portál</title>
+    <style>
+      :root {
+        --bg: #f4f7fa;
+        --surface: #ffffff;
+        --surface-soft: #eef3fa;
+        --surface-soft-2: #e3ecf7;
+        --text: #0f2740;
+        --text-soft: #5b6b80;
+        --text-muted: #8a97aa;
+        --primary: #2870ed;
+        --primary-deep: #1557cc;
+        --primary-soft: #e1ecff;
+        --primary-softer: #f0f6ff;
+        --success: #0cb43f;
+        --success-soft: #e2f7e8;
+        --danger: #e0373a;
+        --danger-soft: #fde6e7;
+        --warn: #f59e0b;
+        --warn-soft: #fef3c7;
+        --border-soft: #e5ebf3;
+        --border-line: #d8e0ec;
+        --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-soft: 0 2px 6px rgba(15, 39, 64, 0.04);
+        --shadow-pop: 0 12px 32px rgba(15, 39, 64, 0.18);
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+        min-height: 100vh;
+        padding-top: 64px;
+      }
+
+      h1, h2, h3, h4, p, ul {
+        margin: 0;
+      }
+
+      ul {
+        padding: 0;
+        list-style: none;
+      }
+
+      button {
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        vertical-align: middle;
+        flex: 0 0 auto;
+      }
+
+      /* ===== Top Bar ===== */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-soft);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        z-index: 100;
+        gap: 16px;
+      }
+
+      .mode-switch {
+        display: inline-flex;
+        background: var(--surface-soft);
+        border-radius: 999px;
+        padding: 4px;
+        gap: 2px;
+      }
+
+      .mode-switch button {
+        border: 0;
+        background: transparent;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: var(--text-soft);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .mode-switch button:hover { color: var(--text); }
+
+      .mode-switch button.active {
+        background: var(--surface);
+        color: var(--primary);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .brand {
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: var(--primary);
+        letter-spacing: -0.01em;
+      }
+
+      .brand .brand-owner {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 0;
+        background: transparent;
+        color: var(--text-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, color 0.15s;
+        position: relative;
+      }
+
+      .icon-btn:hover {
+        background: var(--surface-soft);
+        color: var(--primary);
+      }
+
+      .icon-btn .badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--danger);
+        border: 2px solid var(--surface);
+      }
+
+      /* ===== App Grid ===== */
+      .app-grid {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr) 320px;
+        gap: 20px;
+        padding: 20px;
+        max-width: 1440px;
+        margin: 0 auto;
+        align-items: start;
+      }
+
+      /* ===== Sidebar (Left) ===== */
+      .sidebar {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 84px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+      }
+
+      .segmented {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--surface-soft);
+        border-radius: var(--radius-md);
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .segmented button {
+        border: 0;
+        background: transparent;
+        padding: 8px 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        border-radius: 8px;
+        transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+      }
+
+      .segmented button.active {
+        background: var(--surface);
+        color: var(--primary);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .profile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+      }
+
+      .avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: var(--surface-soft);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 3rem;
+        line-height: 1;
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+      }
+
+      .profile h2 {
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .profile-progress {
+        width: 100%;
+      }
+
+      .progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-size: 0.78rem;
+        color: var(--text-soft);
+      }
+
+      .progress-meta strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--surface-soft);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--primary-deep) 100%);
+        border-radius: 999px;
+        transition: width 0.25s ease;
+      }
+
+      .btn-soft {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: var(--radius-md);
+        border: 0;
+        background: var(--primary-softer);
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 0.88rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.15s;
+      }
+
+      .btn-soft:hover {
+        background: var(--primary-soft);
+      }
+
+      /* Avatar picker */
+      .avatar-picker {
+        display: none;
+        background: var(--primary-softer);
+        border-radius: var(--radius-md);
+        padding: 10px;
+      }
+
+      .avatar-picker.open {
+        display: block;
+      }
+
+      .avatar-picker .picker-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+      }
+
+      .avatar-option {
+        aspect-ratio: 1 / 1;
+        min-width: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        background: var(--surface);
+        font-size: 1.3rem;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .avatar-option:hover {
+        transform: scale(1.08);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .avatar-option.active {
+        border-color: var(--primary);
+        background: var(--primary-soft);
+        box-shadow: 0 0 0 3px rgba(40, 112, 237, 0.15);
+      }
+
+      /* Nav menu (Celkový přehled) */
+      .nav-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: var(--radius-md);
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-align: left;
+        width: 100%;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .nav-item .label {
+        flex: 1;
+      }
+
+      .nav-item:not(.locked):hover {
+        background: var(--surface-soft);
+      }
+
+      .nav-item.active {
+        background: var(--primary-softer);
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .nav-item.locked {
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+
+      .nav-item .chev {
+        transition: transform 0.2s;
+      }
+
+      .nav-item[aria-expanded="true"] .chev {
+        transform: rotate(180deg);
+      }
+
+      .nav-item .month-status {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .month-status.done {
+        background: var(--success);
+        color: #fff;
+      }
+
+      .month-status.partial {
+        background: var(--warn);
+        color: #fff;
+      }
+
+      .month-status.locked {
+        background: var(--surface-soft);
+        color: var(--text-muted);
+      }
+
+      .submenu {
+        margin: 4px 0 8px 36px;
+        padding-left: 12px;
+        border-left: 1px solid var(--border-line);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .submenu.collapsed {
+        display: none;
+      }
+
+      .week-link {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        color: var(--text-soft);
+        border-left: 2px solid transparent;
+        margin-left: -14px;
+        padding-left: 12px;
+        border-radius: 0 6px 6px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: none;
+        border-top: 0;
+        border-right: 0;
+        border-bottom: 0;
+        text-align: left;
+        cursor: pointer;
+        font-family: inherit;
+        width: 100%;
+      }
+
+      .week-link:hover:not(.locked) {
+        color: var(--primary);
+      }
+
+      .week-link.active {
+        color: var(--primary);
+        font-weight: 700;
+        border-left-color: var(--primary);
+      }
+
+      .week-link.locked {
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+
+      .week-link .week-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        font-weight: 800;
+      }
+
+      .week-icon.done {
+        background: var(--success);
+        color: #fff;
+      }
+
+      .week-icon.failed {
+        background: var(--danger);
+        color: #fff;
+      }
+
+      .week-icon.current {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .week-icon.locked {
+        background: var(--surface-soft);
+        color: var(--text-muted);
+        border: 1px solid var(--border-line);
+      }
+
+      /* ===== Main Content ===== */
+      .main {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: 24px;
+      }
+
+      /* Hero */
+      .hero {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 24px;
+        align-items: center;
+      }
+
+      .hero h1 {
+        font-size: 2.1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 4px;
+      }
+
+      .hero .week-theme {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 12px;
+      }
+
+      .hero p.lead {
+        color: var(--text-soft);
+        font-size: 1rem;
+        margin-bottom: 20px;
+        max-width: 52ch;
+      }
+
+      .hero-progress .progress-meta {
+        font-size: 0.85rem;
+      }
+
+      .hero-progress .progress-meta strong {
+        font-size: 1.15rem;
+      }
+
+      .hero-progress .progress-track {
+        height: 10px;
+      }
+
+      .hero-progress .summary {
+        margin-top: 8px;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+      }
+
+      .hero-art {
+        position: relative;
+        border-radius: var(--radius-lg);
+        aspect-ratio: 1 / 1;
+        max-height: 240px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .hero-art .hero-emoji {
+        font-size: 5rem;
+        line-height: 1;
+        filter: drop-shadow(0 12px 18px rgba(40, 112, 237, 0.25));
+      }
+
+      /* Tasks */
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      .empty-state {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        text-align: center;
+        color: var(--text-soft);
+        box-shadow: var(--shadow-card);
+      }
+
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .task-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: 18px;
+        display: grid;
+        grid-template-columns: 56px 1fr auto;
+        gap: 16px;
+        align-items: start;
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+
+      .task-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+      }
+
+      .task-card.done .task-title {
+        color: var(--text-muted);
+      }
+
+      .task-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: var(--primary-softer);
+        color: var(--primary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+      }
+
+      .task-body {
+        min-width: 0;
+      }
+
+      .task-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .task-title {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .task-subtitle {
+        margin-top: 4px;
+        color: var(--text-soft);
+        font-size: 0.88rem;
+      }
+
+      .task-tag {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: var(--surface-soft);
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .task-actions {
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: var(--radius-md);
+        padding: 9px 14px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.15s, color 0.15s, transform 0.05s;
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-deep);
+      }
+
+      .btn-disabled {
+        background: var(--surface-soft);
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+
+      .btn-success {
+        background: var(--success);
+        color: #fff;
+      }
+
+      .points-tag {
+        background: var(--primary-soft);
+        color: var(--primary-deep);
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+
+      .priority-tag {
+        background: var(--danger-soft);
+        color: var(--danger);
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 3px 8px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .check-square {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        border: 2px solid var(--border-line);
+        background: var(--surface);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+        color: transparent;
+        flex-shrink: 0;
+      }
+
+      .check-square:hover {
+        border-color: var(--primary);
+      }
+
+      .check-square.checked {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+      }
+
+      /* Weekly schedule view */
+      .schedule {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: 24px;
+      }
+
+      .schedule-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+
+      .schedule-header h1 {
+        font-size: 1.6rem;
+        font-weight: 800;
+      }
+
+      .schedule-header .theme {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .schedule-day {
+        background: var(--surface-soft);
+        border-radius: var(--radius-md);
+        padding: 12px;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .schedule-day .day-head {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text);
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .schedule-day .day-head .day-date {
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.78rem;
+      }
+
+      .schedule-event {
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        border-left: 3px solid var(--primary);
+      }
+
+      .schedule-event .ev-time {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 0.72rem;
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .schedule-event.cat-training { border-left-color: var(--primary); }
+      .schedule-event.cat-physical { border-left-color: var(--success); background: var(--success-soft); }
+      .schedule-event.cat-shadow { border-left-color: var(--warn); background: var(--warn-soft); }
+      .schedule-event.cat-self { border-left-color: var(--text-soft); }
+      .schedule-event.cat-feedback { border-left-color: #a855f7; background: #f3e8ff; }
+
+      /* Kompaktní rozvrh v sidebaru (přepínač Harmonogram týdne) – 5 kroků */
+      .sidebar-schedule {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 0.82rem;
+      }
+      .sidebar-schedule .sched-head {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 6px 4px 8px;
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .sidebar-schedule .sched-head strong {
+        font-size: 0.95rem;
+        color: var(--primary);
+      }
+      .sidebar-schedule .sched-head span {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+      }
+      .sidebar-schedule .step-card {
+        background: var(--surface-soft);
+        border-radius: var(--radius-md);
+        padding: 10px 12px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        border-left: 3px solid var(--primary);
+      }
+      .sidebar-schedule .step-card .step-icon {
+        flex: 0 0 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--surface);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+      .sidebar-schedule .step-card .step-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+        flex: 1;
+      }
+      .sidebar-schedule .step-card .step-title {
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: var(--text);
+        line-height: 1.25;
+      }
+      .sidebar-schedule .step-card .step-desc {
+        font-size: 0.74rem;
+        color: var(--text-soft);
+        line-height: 1.3;
+      }
+      .sidebar-schedule .step-card .step-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-top: 2px;
+      }
+      .sidebar-schedule .step-card .step-link:hover { text-decoration: underline; }
+      .sidebar-schedule .step-card.cat-self { border-left-color: var(--text-soft); }
+      .sidebar-schedule .step-card.cat-webinar { border-left-color: #a855f7; }
+      .sidebar-schedule .step-card.cat-physical { border-left-color: var(--success); }
+      .sidebar-schedule .step-card.cat-branch { border-left-color: var(--warn); }
+      .sidebar-schedule .step-card.cat-exam { border-left-color: var(--primary); }
+
+      /* ===== Right sidebar ===== */
+      .right {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 84px;
+      }
+
+      .btn-block {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: var(--primary);
+        color: #fff;
+        border: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 6px 14px rgba(40, 112, 237, 0.25);
+        transition: background 0.15s, transform 0.05s;
+      }
+
+      .btn-block:hover {
+        background: var(--primary-deep);
+      }
+
+      .btn-block:active {
+        transform: scale(0.99);
+      }
+
+      .challenge {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .challenge h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 4px;
+      }
+
+      .challenge p {
+        font-size: 0.85rem;
+        color: var(--text-soft);
+      }
+
+      .challenge .target {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: radial-gradient(circle at 50% 50%, #ffd2c7 0%, #ff7a52 70%, #d94a23 100%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.7rem;
+        flex-shrink: 0;
+      }
+
+      .leaderboard {
+        padding: 18px;
+      }
+
+      .leaderboard h2 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .leaderboard .segmented {
+        margin-bottom: 14px;
+      }
+
+      .lb-table {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .lb-head,
+      .lb-row {
+        display: grid;
+        grid-template-columns: 28px 1fr auto;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 4px;
+      }
+
+      .lb-head {
+        border-bottom: 1px solid var(--border-soft);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        letter-spacing: 0.06em;
+      }
+
+      .lb-head .right-col {
+        text-align: right;
+      }
+
+      .lb-row {
+        border-radius: 10px;
+      }
+
+      .lb-row.me {
+        background: var(--primary-softer);
+      }
+
+      .lb-pos {
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .lb-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        font-weight: 500;
+      }
+
+      .lb-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--surface-soft);
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+
+      .lb-points {
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: var(--primary);
+        text-align: right;
+      }
+
+      .lb-row.me .lb-name,
+      .lb-row.me .lb-pos {
+        color: var(--primary-deep);
+        font-weight: 700;
+      }
+
+      .lb-link {
+        display: block;
+        margin-top: 12px;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--primary);
+        padding: 8px;
+        border-radius: 8px;
+      }
+
+      .lb-link:hover {
+        background: var(--surface-soft);
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 39, 64, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        padding: 20px;
+      }
+
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .modal {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 460px;
+        padding: 24px;
+        box-shadow: var(--shadow-pop);
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+      }
+
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .modal-head h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .modal-close {
+        background: transparent;
+        border: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: var(--text-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-close:hover {
+        background: var(--surface-soft);
+      }
+
+      .modal label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        margin: 12px 0 6px;
+      }
+
+      .modal select,
+      .modal textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-line);
+        font-family: inherit;
+        font-size: 0.9rem;
+        color: var(--text);
+        background: var(--surface);
+        outline: none;
+        resize: vertical;
+      }
+
+      .modal select:focus,
+      .modal textarea:focus {
+        border-color: var(--primary);
+      }
+
+      .modal textarea {
+        min-height: 90px;
+      }
+
+      .modal-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .modal-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(120%);
+        background: var(--success);
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        box-shadow: var(--shadow-pop);
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+        z-index: 300;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .modal-toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* ===== Manažerské rozhraní ===== */
+      .manager-app {
+        display: none;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 24px 20px 40px;
+      }
+      body.mode-manager .manager-app { display: block; }
+      body.mode-manager .app-grid { display: none; }
+
+      .manager-app .mgr-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .manager-app .mgr-title h1 {
+        font-size: 1.45rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+      .manager-app .mgr-title p {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+      }
+      .manager-app .cohort-select {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        padding: 8px 14px;
+        box-shadow: var(--shadow-card);
+        font-size: 0.88rem;
+      }
+      .manager-app .cohort-select label {
+        font-weight: 600;
+        color: var(--text-soft);
+      }
+      .manager-app .cohort-select select {
+        border: 0;
+        background: transparent;
+        font: inherit;
+        font-weight: 700;
+        color: var(--primary);
+        cursor: pointer;
+        padding: 4px 0;
+      }
+
+      .mgr-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .mgr-summary .summary-card {
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .mgr-summary .summary-card .label {
+        font-size: 0.78rem;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 600;
+      }
+      .mgr-summary .summary-card .value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .mgr-summary .summary-card.warn .value { color: var(--warn); }
+      .mgr-summary .summary-card.good .value { color: var(--success); }
+      .mgr-summary .summary-card.bad .value { color: var(--danger); }
+
+      .newcomers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .newcomer-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: 16px 18px;
+        display: grid;
+        grid-template-columns: 56px minmax(200px, 1.4fr) minmax(200px, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+      }
+      .newcomer-card .nc-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--surface-soft);
+        font-size: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .newcomer-card .nc-info .nc-name {
+        font-weight: 700;
+        font-size: 1rem;
+      }
+      .newcomer-card .nc-info .nc-meta {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        margin-top: 2px;
+      }
+      .newcomer-card .nc-info .nc-week-tag {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+      .newcomer-card .nc-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .newcomer-card .nc-progress .meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        color: var(--text-soft);
+      }
+      .newcomer-card .nc-progress .meta strong { color: var(--text); }
+      .newcomer-card .nc-progress .track {
+        height: 8px;
+        border-radius: 999px;
+        background: var(--surface-soft);
+        overflow: hidden;
+      }
+      .newcomer-card .nc-progress .fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--primary-deep));
+        border-radius: 999px;
+      }
+      .newcomer-card .nc-action {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+        min-width: 200px;
+      }
+      .newcomer-card .nc-action .nc-state {
+        font-size: 0.74rem;
+        font-weight: 600;
+        text-align: center;
+      }
+      .newcomer-card .nc-action .nc-state.pending { color: var(--warn); }
+      .newcomer-card .nc-action .nc-state.approved { color: var(--success); }
+      .newcomer-card .nc-action .nc-state.in-progress { color: var(--text-soft); }
+      .newcomer-card .nc-action .nc-state.done { color: var(--success); }
+      .newcomer-card .nc-action button {
+        border: 0;
+        border-radius: var(--radius-md);
+        padding: 9px 14px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .newcomer-card .nc-action button.approve {
+        background: var(--success);
+        color: #fff;
+      }
+      .newcomer-card .nc-action button.approve:hover { background: #0a9c37; }
+      .newcomer-card .nc-action button.ghost {
+        background: var(--surface-soft);
+        color: var(--text-soft);
+        cursor: default;
+      }
+      @media (max-width: 880px) {
+        .newcomer-card {
+          grid-template-columns: 56px 1fr;
+        }
+        .newcomer-card .nc-progress,
+        .newcomer-card .nc-action {
+          grid-column: 1 / -1;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 1180px) {
+        .app-grid {
+          grid-template-columns: 240px minmax(0, 1fr);
+        }
+        .right {
+          grid-column: 1 / -1;
+          position: static;
+        }
+      }
+
+      @media (max-width: 880px) {
+        .app-grid {
+          grid-template-columns: 1fr;
+        }
+        .sidebar,
+        .right {
+          position: static;
+          max-height: none;
+        }
+        .hero {
+          grid-template-columns: 1fr;
+        }
+        .hero-art {
+          max-height: 180px;
+        }
+        .schedule-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .task-card {
+          grid-template-columns: 44px 1fr;
+        }
+        .task-card .check-square {
+          grid-column: 2 / 3;
+          justify-self: end;
+          margin-top: -42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top-bar" role="banner">
+      <div class="brand"><span class="brand-owner">Martinův</span> adaptační portál</div>
+      <div class="mode-switch" role="tablist" aria-label="Přepínač rozhraní" id="modeSwitch">
+        <button class="active" role="tab" aria-selected="true" data-mode="newcomer" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Nováček
+        </button>
+        <button role="tab" aria-selected="false" data-mode="manager" type="button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-3-3.87"/><path d="M7 21v-2a4 4 0 0 1 3-3.87"/><circle cx="9" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Manažer
+        </button>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" aria-label="Notifikace" title="Notifikace">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="badge"></span>
+        </button>
+        <button class="icon-btn" aria-label="Nápověda" title="Nápověda">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="app-grid">
+      <!-- ===== Left Sidebar ===== -->
+      <aside class="sidebar" aria-label="Postranní navigace">
+        <div class="segmented" role="tablist" aria-label="Pohled na adaptaci" id="viewSwitch">
+          <button class="active" role="tab" aria-selected="true" data-view="overview">Celkový přehled</button>
+          <button role="tab" aria-selected="false" data-view="schedule">Harmonogram týdne</button>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" id="profileAvatar" aria-label="Avatar">M</div>
+          <h2>Vítej, Martine</h2>
+          <div class="profile-progress">
+            <div class="progress-meta">
+              <span>Pokrok za celou adaptaci</span>
+              <strong id="globalPercent">0 %</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="globalProgress" style="width: 0%"></div>
+            </div>
+          </div>
+          <button class="btn-soft" type="button" id="myDetailBtn" aria-expanded="false" aria-controls="avatarPicker">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+            Můj profil
+          </button>
+          <div class="avatar-picker" id="avatarPicker" role="region" aria-label="Výběr avatara">
+            <div class="picker-title">Vyber si svého avatara</div>
+            <div class="avatar-grid" id="avatarGrid"></div>
+          </div>
+        </div>
+
+        <nav class="nav-menu" id="overviewNav" aria-label="Měsíce adaptace"></nav>
+        <div class="sidebar-schedule" id="sidebarSchedule" aria-label="Rozvrh aktuálního týdne" style="display:none;"></div>
+      </aside>
+
+      <!-- ===== Main Content ===== -->
+      <main class="main" id="mainContent"></main>
+
+      <!-- ===== Right Sidebar ===== -->
+      <aside class="right" aria-label="Doplňující panely">
+        <button class="btn-block" type="button" id="pokeBtn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-6 0v7"/><path d="M5 9h14l-1 12H6L5 9z"/></svg>
+          Šťouchnutí
+        </button>
+
+        <div class="card challenge" id="challengeCard" data-state="open">
+          <div style="flex:1;">
+            <h3>Výzva měsíce</h3>
+            <p id="challengeDesc">Navolat 100 schůzek</p>
+            <button class="btn btn-primary" type="button" id="challengeBtn" style="margin-top:10px;">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Dokončil jsem
+            </button>
+          </div>
+          <div class="target" aria-hidden="true" id="challengeTarget">🎯</div>
+        </div>
+
+        <div class="card leaderboard">
+          <h2>Žebříček nováčků</h2>
+          <div class="segmented" role="tablist" aria-label="Pohled na žebříček" id="leaderboardSwitch">
+            <button class="active" role="tab" aria-selected="true" data-lb="current">Můj běh</button>
+            <button role="tab" aria-selected="false" data-lb="history">Předchozí běhy</button>
+          </div>
+          <div class="lb-table" id="leaderboardTable"></div>
+          <a href="#" class="lb-link" id="lbFullLink">Zobrazit kompletní žebříček</a>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ===== Manažerské rozhraní ===== -->
+    <section class="manager-app" id="managerApp" aria-label="Manažerské rozhraní">
+      <div class="mgr-head">
+        <div class="mgr-title">
+          <h1>Moji nováčci</h1>
+          <p>Sleduj progres svých nováčků a schvaluj jim dokončené týdny.</p>
+        </div>
+        <div class="cohort-select">
+          <label for="cohortSelect">Běh:</label>
+          <select id="cohortSelect"></select>
+        </div>
+      </div>
+      <div class="mgr-summary" id="mgrSummary"></div>
+      <div class="newcomers-list" id="newcomersList"></div>
+    </section>
+
+    <!-- Poke Modal -->
+    <div class="modal-overlay" id="pokeModal" role="dialog" aria-modal="true" aria-labelledby="pokeTitle">
+      <div class="modal">
+        <div class="modal-head">
+          <h2 id="pokeTitle">Pošli šťouchnutí</h2>
+          <button class="modal-close" type="button" data-close="pokeModal" aria-label="Zavřít">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <p style="color: var(--text-soft); font-size: 0.9rem;">Vyber kolegu a přidej osobní vzkaz.</p>
+        <label for="pokeColleague">Kolega</label>
+        <select id="pokeColleague"></select>
+        <label for="pokeMessage">Vzkaz</label>
+        <textarea id="pokeMessage" placeholder="Např. Ahoj, jak se ti daří s úvěrovou certifikací? 💪" maxlength="280"></textarea>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-disabled" data-close="pokeModal" style="background: var(--surface-soft); color: var(--text); cursor: pointer;">Zrušit</button>
+          <button type="button" class="btn btn-primary" id="pokeSendBtn">Odeslat šťouchnutí</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal-overlay" id="feedbackModal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+      <div class="modal">
+        <div class="modal-head">
+          <h2 id="feedbackTitle">Zpětná vazba k úkolu</h2>
+          <button class="modal-close" type="button" data-close="feedbackModal" aria-label="Zavřít">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <p style="color: var(--text-soft); font-size: 0.9rem;" id="feedbackTaskInfo">Napiš pár vět o tom, co ti úkol dal a co bylo náročné. Odměna: <strong>+1 bod</strong>.</p>
+        <label for="feedbackText">Tvoje zpětná vazba</label>
+        <textarea id="feedbackText" placeholder="Co jsem se naučil? Co se povedlo? Co mě překvapilo?" maxlength="500"></textarea>
+        <div class="modal-actions">
+          <button type="button" data-close="feedbackModal" style="border:0; padding:9px 14px; border-radius:var(--radius-md); background: var(--surface-soft); color: var(--text); font-weight:600; cursor:pointer;">Zrušit</button>
+          <button type="button" class="btn btn-primary" id="feedbackSendBtn">Odeslat zpětnou vazbu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Leaderboard Modal -->
+    <div class="modal-overlay" id="fullLbModal" role="dialog" aria-modal="true" aria-labelledby="fullLbTitle">
+      <div class="modal" style="max-width: 640px;">
+        <div class="modal-head">
+          <h2 id="fullLbTitle">Kompletní žebříček nováčků</h2>
+          <button class="modal-close" type="button" data-close="fullLbModal" aria-label="Zavřít">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <p style="color: var(--text-soft); font-size: 0.9rem;">Přehled všech kolegů v adaptaci a jejich body za splněné úkoly.</p>
+        <div class="lb-table" id="fullLbTable" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <div class="modal-toast" id="toast" role="status" aria-live="polite">Šťouchnutí odesláno ✓</div>
+
+    <script>
+      // =================================================================
+      // DATA
+      // =================================================================
+
+      // 24 různorodých avatarů – pestré pleti, styly i povolání
+      const AVATARS = [
+        "🧑🏻‍🚀", "👩🏽‍🎤", "🧙🏿‍♀️", "🧛🏻‍♂️", "🦸🏽‍♀️", "🧝🏼‍♂️",
+        "🥷🏻", "🧑🏾‍🎨", "👩🏻‍🔬", "🧑🏿‍🌾", "🧑🏼‍🍳", "👨🏽‍🚒",
+        "👩🏼‍🦳", "🤵🏿", "👸🏻", "🧑🏽‍💻", "🦹🏻‍♀️", "🧑🏾‍🎓",
+        "🧑🏻‍🎤", "👨🏿‍🎨", "👩🏼‍🚀", "🧑🏽‍🏫", "👩🏿‍💻", "🧑🏼‍🎮"
+      ];
+
+      // Tematický blok jednotlivých týdnů (Rozpis nové adaptace.xlsx)
+      const WEEKS = [
+        { n: 1,  month: 1, theme: "Vítejte v ČS",
+          desc: "Onboarding na pobočku, stínování v triádě a první seznámení s digitální gramotností.",
+          emoji: "🏦", gradient: "linear-gradient(135deg, #d6e6ff 0%, #f4f7fa 100%)" },
+        { n: 2,  month: 1, theme: "Příchozí klient",
+          desc: "Práce s příchozím klientem – rozdíl mezi servisem a potřebou, ověřovací webinář a fyzický den.",
+          emoji: "🤝", gradient: "linear-gradient(135deg, #ffe6cf 0%, #ffd6a8 100%)" },
+        { n: 3,  month: 1, theme: "Telefonování",
+          desc: "Aktivní telefonování, callskript, práce s námitkami a vlastní struktura hovoru.",
+          emoji: "📞", gradient: "linear-gradient(135deg, #d4f3df 0%, #b3e6c7 100%)" },
+        { n: 4,  month: 1, theme: "Poradenství START",
+          desc: "Rozpočet a finanční rezerva klienta, principy etického poradenství.",
+          emoji: "🚀", gradient: "linear-gradient(135deg, #e9defc 0%, #d4c1f5 100%)" },
+        { n: 5,  month: 2, theme: "ČBA Úvěry – certifikace",
+          desc: "Příprava a složení certifikace ČBA Úvěry. Tento týden se nepodařilo dokončit – nutné dohnat.",
+          emoji: "🎓", gradient: "linear-gradient(135deg, #ffd9d9 0%, #ffb1b3 100%)" },
+        { n: 6,  month: 2, theme: "Úvěry",
+          desc: "Spotřebitelské úvěry, revolving, x-sell s TL a fyzický den ÚVĚRY.",
+          emoji: "💳", gradient: "linear-gradient(135deg, #d4eaff 0%, #b3d4ff 100%)" },
+        { n: 7,  month: 2, theme: "Bydlení",
+          desc: "Hypotéky a bydlení – proces sjednání, sběr podkladů, FAQ a fyzický den BYDLENÍ.",
+          emoji: "🏠", gradient: "linear-gradient(135deg, #fff4cf 0%, #ffe49a 100%)" },
+        { n: 8,  month: 2, theme: "Pojištění Život",
+          desc: "Životní pojištění – ochrana příjmu klienta, námitky a 4 modelové životní situace.",
+          emoji: "🛡️", gradient: "linear-gradient(135deg, #e0f5e9 0%, #b8e2c7 100%)" },
+        { n: 9,  month: 3, theme: "ČBA Pojištění – certifikace",
+          desc: "Certifikace ČBA Pojištění – ukotvení znalostí a kvalitní revize pojistných smluv.",
+          emoji: "📜", gradient: "linear-gradient(135deg, #ffe5cc 0%, #ffc99a 100%)" },
+        { n: 10, month: 3, theme: "Pojištění Neživot",
+          desc: "Majetkové a neživotní pojištění – rizika domácnosti, balíček NŽP a pojistné události.",
+          emoji: "🏡", gradient: "linear-gradient(135deg, #d4eaff 0%, #a8d2ff 100%)" },
+        { n: 11, month: 3, theme: "Budoucnost / Investice",
+          desc: "Investiční rozhovor, volatilita pro klienta a argumentace napříč věkovými profily.",
+          emoji: "📈", gradient: "linear-gradient(135deg, #e9defc 0%, #c2a8f0 100%)" },
+        { n: 12, month: 3, theme: "Poradenství KOMPLET",
+          desc: "Komplexní finanční řešení, prevence podvodů a fyzický den PORADENSTVÍ KOMPLET.",
+          emoji: "🌟", gradient: "linear-gradient(135deg, #fff4cf 0%, #ffd970 100%)" }
+      ];
+
+      // Stav adaptace – Martin je aktuálně ve 2. měsíci, 3. týdnu (= globální týden 7)
+      // Statusy: done | failed | current | locked
+      const WEEK_STATUS = {
+        1: "done",     2: "done",    3: "done",    4: "done",
+        5: "failed",   6: "done",    7: "current", 8: "locked",
+        9: "locked",  10: "locked", 11: "locked", 12: "locked"
+      };
+
+      // On-the-job aktivity (z přiloženého Excelu) – pro každý týden 5 hlavních úkolů.
+      // Pro týden, který je current, jsou interaktivní; pro done všechny splněny;
+      // pro failed/locked se rovněž zobrazí, ale s odpovídajícím stavem.
+      const TASKS_BY_WEEK = {
+        1: [
+          ["Onboarding na pobočce", "Seznámení s týmem, prostředím a denním režimem.", "Stínování", "👥"],
+          ["Index Digitální gramotnost 1", "Projdi e-learning Index DG1 a otestuj se.", "E-learning", "💻"],
+          ["Triáda 1 – setkání s mentorem", "Sjednej a absolvuj první triádu (TL + mentor).", "Aplikace školení", "🤝"],
+          ["Procházka pobočkou", "Sepiš si rozvržení pobočky a klíčové kontakty.", "Vlastní struktura", "🗺️"],
+          ["AI – nech si představit ČS", "Požádej Copilot o stručný přehled produktové nabídky ČS.", "AI", "🤖"]
+        ],
+        2: [
+          ["Zamysli se: servis vs. potřeba", "Uveď 3 příklady z praxe, jdi za BKP a sepiš rozdíly.", "Zamýšlení", "🧠"],
+          ["Modelový hovor s TL", "Vyzkoušej převést servisní dotaz na poradenskou otázku.", "Aplikace školení", "🎯"],
+          ["Stínuj kolegu při rozhovoru", "Zaznamenej okamžik přechodu k nabídce produktu.", "Stínování", "👀"],
+          ["První 3 minuty rozhovoru", "Sestav vlastní strukturu úvodu klientského jednání.", "Vlastní struktura", "📝"],
+          ["Otevřené otázky s Copilotem", "Nech AI navrhnout otázky pro zjištění potřeb klienta.", "AI", "🤖"]
+        ],
+        3: [
+          ["Volám já vs. volá klient", "Sepiš svůj pohled na rozdíl obou situací.", "Zamýšlení", "🧠"],
+          ["3 testovací hovory", "Proveď hovory podle call skriptu a zapiš reakce.", "Aplikace školení", "📞"],
+          ["Poslech hovoru kolegy", "Zaznamenej práci s námitkou.", "Stínování", "👀"],
+          ["Vlastní struktura telefonátu", "Úvod – potřeba – hodnota – další krok.", "Vlastní struktura", "📝"],
+          ["AI – vylepši úvodní větu", "Pomocí AI uprav otevírací větu telefonátu.", "AI", "🤖"]
+        ],
+        4: [
+          ["Co musí klient pochopit před úvěrem", "Sepiš klíčové body etického poradenství.", "Zamýšlení", "🧠"],
+          ["Modelový rozpočet s TL", "Projdi základní cashflow a rozpočet klienta.", "Aplikace školení", "🎯"],
+          ["Stínuj prodej úvěru", "Sleduj kolegu a sepiš klíčové edukační body.", "Stínování", "👀"],
+          ["Kostra edukace o úvěrech", "Vytvoř srozumitelnou kostru pro klienta.", "Vlastní struktura", "📝"],
+          ["AI – přirovnání pro úrok", "Nech AI vytvořit jednoduché přirovnání.", "AI", "🤖"]
+        ],
+        5: [
+          ["Rizikové signály klienta", "Sepiš min. 5 rizikových signálů u úvěrů.", "Zamýšlení", "🧠"],
+          ["Příprava na ČBA Úvěry", "Vytvoř seznam nejasností a nech si je vysvětlit.", "Aplikace školení", "🎯"],
+          ["Stínuj práci s regulací", "Sleduj kolegu při práci se záznamy a regulacemi.", "Stínování", "👀"],
+          ["Checklist „Bezpečný úvěr“", "Napiš vlastní checklist pro úvěrový rozhovor.", "Vlastní struktura", "📝"],
+          ["AI – povinnosti bankéře", "Požádej AI o shrnutí klíčových povinností dle ČBA.", "AI", "🤖"]
+        ],
+        6: [
+          ["Revolving – pomoc nebo problém", "Uveď 3 scénáře použití revolvingu.", "Zamýšlení", "🧠"],
+          ["Představ revolvingy klientům", "Pod dohledem TL představ produkt 3 klientům.", "Aplikace školení", "🎯"],
+          ["Stínuj řešení potřeb úvěrem", "Sepiš, proč kolega vybral konkrétní produkt.", "Stínování", "👀"],
+          ["Úvěr vs. vlastní zdroje", "Sepiš důvody, kdy je úvěr lepší volba.", "Vlastní struktura", "📝"],
+          ["AI – srovnání produktů", "Nech AI srovnat úvěrové produkty pro klienta.", "AI", "🤖"]
+        ],
+        7: [
+          ["Největší stres klienta u hypotéky", "Sepiš úvahy o emocích klienta při hypotéce.", "Zamýšlení", "🧠"],
+          ["Projdi celý proces s HS", "Sjednání hypotéky od dotazu po čerpání.", "Aplikace školení", "🎯"],
+          ["Stínuj sběr podkladů", "Zapiš si, na co se kolega vyptával klienta.", "Stínování", "👀"],
+          ["Onepager „Hypotéka A–Z“", "Vytvoř návod průběhu sjednání hypotéky.", "Vlastní struktura", "📝"],
+          ["AI – FAQ k hypotékám", "Pomocí AI připrav FAQ pro klienty.", "AI", "🤖"]
+        ],
+        8: [
+          ["Proč klienti podceňují ŽP", "Sepiš důvody i argumenty proč ŽP řešit.", "Zamýšlení", "🧠"],
+          ["ŽP pro 4 životní situace", "Navrhni pojištění pro 4 různé klienty.", "Aplikace školení", "🎯"],
+          ["Stínuj práci s námitkami", "Zapiš námitky klienta a způsob jejich řešení.", "Stínování", "👀"],
+          ["Struktura rozhovoru o ochraně příjmů", "Sestav vlastní logický postup.", "Vlastní struktura", "📝"],
+          ["AI – příběh klienta", "Nech AI vytvořit ilustraci významu pojištění.", "AI", "🤖"]
+        ],
+        9: [
+          ["Znaky dobře pojištěného klienta", "Sepiš, co to znamená pro jeho život.", "Zamýšlení", "🧠"],
+          ["Příprava na ČBA Pojištění", "Seznam nejasností k certifikaci.", "Aplikace školení", "🎯"],
+          ["Stínuj revizi smluv", "Sleduj POS/OBA a zapiš argumentaci benefitů.", "Stínování", "👀"],
+          ["Checklist „Revize pojištění“", "Vytvoř systematické schéma revize NŽP.", "Vlastní struktura", "📝"],
+          ["AI – klíčové pojmy pojištění", "Nech AI shrnout pojmy srozumitelně klientovi.", "AI", "🤖"]
+        ],
+        10: [
+          ["Rizika, která klient přehlíží", "Sepiš příklady prevence podpojištění.", "Zamýšlení", "🧠"],
+          ["Balíček NŽP s POS", "Navrhni základní balíček pro modelového klienta.", "Aplikace školení", "🎯"],
+          ["Pojistná událost v praxi", "Sleduj řešení pojistné události u klienta.", "Stínování", "👀"],
+          ["Struktura rozhovoru o majetku", "Sestav scénář pro téma pojištění majetku.", "Vlastní struktura", "📝"],
+          ["AI – checklist rizik domácnosti", "Požádej AI o checklist dle typu bydlení.", "AI", "🤖"]
+        ],
+        11: [
+          ["Proč lidé neinvestují", "Sepiš nejčastější obavy a tvou reakci.", "Zamýšlení", "🧠"],
+          ["4 důvody investovat × 3 profily", "Sestav argumentaci pro různé věkové skupiny.", "Aplikace školení", "🎯"],
+          ["Stínuj IS – volatilita", "Zapiš si jednoduché vysvětlení volatility.", "Stínování", "👀"],
+          ["Struktura investičního rozhovoru", "Vytvoř checklist klíčových informací.", "Vlastní struktura", "📝"],
+          ["AI – investiční pojmy laikovi", "Nech AI přeložit pojmy do běžné řeči.", "AI", "🤖"]
+        ],
+        12: [
+          ["Expert vs. prodavač produktů", "Sepiš 5 rozdílů mezi nimi.", "Zamýšlení", "🧠"],
+          ["Komplexní finanční řešení", "Připrav přípravu na schůzku se vším propojeným.", "Aplikace školení", "🎯"],
+          ["Stínuj EP poradenství", "Zapiš klíčové body, které chceš převzít.", "Stínování", "👀"],
+          ["Klíčové body finančního plánu", "Sestav celostní strukturu plánu.", "Vlastní struktura", "📝"],
+          ["AI – vyhodnocení plánu", "Nech AI navrhnout zlepšení tvého plánu.", "AI", "🤖"]
+        ]
+      };
+
+      // Které úkoly v týdnu jsou prioritní
+      const PRIORITY_TASKS = {
+        5: [1], // certifikace ČBA Úvěry – aplikace školení byla prioritní (failed)
+        7: [1]  // proces hypotéky s HS
+      };
+
+      // Harmonogram aktuálního týdne (Týden 7 – Bydlení)
+      const SCHEDULE = {
+        weekStartDate: "9. 6. 2025",
+        days: [
+          { name: "Pondělí", date: "9. 6.", events: [
+            { time: "09:00–10:30", title: "Index Bydlení 1", cat: "training" },
+            { time: "11:00–12:00", title: "Triáda s TL + mentorem", cat: "feedback" },
+            { time: "13:00–15:00", title: "Tvorba pracovního sešitu", cat: "self" }
+          ]},
+          { name: "Úterý", date: "10. 6.", events: [
+            { time: "09:00–10:30", title: "Ověřovací webinář – Hypotéky", cat: "training" },
+            { time: "11:00–13:00", title: "Stínování HS na pobočce", cat: "shadow" },
+            { time: "14:00–15:00", title: "AI – FAQ k hypotékám", cat: "self" }
+          ]},
+          { name: "Středa", date: "11. 6.", events: [
+            { time: "09:00–17:00", title: "Fyzický den BYDLENÍ", cat: "physical" }
+          ]},
+          { name: "Čtvrtek", date: "12. 6.", events: [
+            { time: "09:00–10:00", title: "Follow-up: sběr podkladů od klienta", cat: "shadow" },
+            { time: "10:30–12:00", title: "Modelový hovor o hypotéce", cat: "training" },
+            { time: "14:00–15:00", title: "Onepager „Hypotéka A–Z“", cat: "self" }
+          ]},
+          { name: "Pátek", date: "13. 6.", events: [
+            { time: "09:00–10:00", title: "Reflexe týdne s TL", cat: "feedback" },
+            { time: "10:30–12:00", title: "Příprava na týden 8 (ŽP)", cat: "self" }
+          ]}
+        ]
+      };
+
+      // Kolegové pro šťouchnutí
+      const COLLEAGUES = [
+        { name: "Jana Nováková", role: "Mentor / Senior bankéř", emoji: "👩🏻‍💼" },
+        { name: "Petr Krčmář", role: "TL pobočky", emoji: "👨🏼‍💼" },
+        { name: "Lucie Svobodová", role: "Specialistka HS", emoji: "👩🏽‍💻" },
+        { name: "Tomáš Dvořák", role: "OBA – pojištění", emoji: "👨🏻‍🦱" },
+        { name: "Kateřina Procházková", role: "POS specialistka", emoji: "👩🏼‍🦰" },
+        { name: "Daniel Horák", role: "IS – investiční specialista", emoji: "👨🏿‍💼" },
+        { name: "Eva Marková", role: "BKP", emoji: "👩🏻‍🦳" },
+        { name: "Ondřej Bartoš", role: "Mentor adaptace", emoji: "🧑🏽‍🏫" }
+      ];
+
+      // Leaderboard
+      const LB_CURRENT = [
+        { pos: 1, name: "Jana Nováková",   pts: 850, emoji: "👩🏻‍💼" },
+        { pos: 2, name: "Martin V. (Ty)",  pts: 720, me: true },
+        { pos: 3, name: "Petr Krčmář",     pts: 610, emoji: "🧑🏼‍🍳" },
+        { pos: 4, name: "Lucie Svobodová", pts: 450, emoji: "👩🏽‍💻" },
+        { pos: 5, name: "Tomáš Dvořák",    pts: 410, emoji: "🥷🏻" },
+        { pos: 6, name: "Eva Marková",     pts: 380, emoji: "🧝🏼‍♂️" }
+      ];
+      const LB_HISTORY = [
+        { pos: 1, name: "Adam Černý",        pts: 1240, emoji: "🧑🏻‍🚀",  note: "Nástup leden 2025" },
+        { pos: 2, name: "Barbora Hájková",   pts: 1180, emoji: "🦸🏽‍♀️", note: "Nástup únor 2025" },
+        { pos: 3, name: "Marek Veselý",      pts: 1120, emoji: "🧑🏽‍🏫", note: "Nástup říjen 2024" },
+        { pos: 4, name: "Klára Šimková",     pts: 1080, emoji: "👸🏻",   note: "Nástup listopad 2024" },
+        { pos: 5, name: "David Růžička",     pts:  990, emoji: "🧑🏼‍🎮", note: "Nástup srpen 2024" },
+        { pos: 6, name: "Veronika Kolářová", pts:  940, emoji: "👩🏽‍🎤", note: "Nástup září 2024" },
+        { pos: 7, name: "Filip Beneš",       pts:  880, emoji: "🧙🏿‍♀️", note: "Nástup duben 2024" }
+      ];
+
+      // Kompletní žebříček – širší testovací sada všech nováčků v adaptaci
+      const LB_FULL = [
+        { name: "Jana Nováková",     pts: 850, emoji: "👩🏻‍💼", since: "Březen 2025" },
+        { name: "Martin V. (Ty)",    pts: 720, me: true,        since: "Duben 2025" },
+        { name: "Petr Krčmář",       pts: 610, emoji: "🧑🏼‍🍳", since: "Duben 2025" },
+        { name: "Lucie Svobodová",   pts: 450, emoji: "👩🏽‍💻", since: "Květen 2025" },
+        { name: "Tomáš Dvořák",      pts: 410, emoji: "🥷🏻",   since: "Květen 2025" },
+        { name: "Eva Marková",       pts: 380, emoji: "🧝🏼‍♂️", since: "Květen 2025" },
+        { name: "Ondřej Bartoš",     pts: 360, emoji: "🧑🏽‍🏫", since: "Květen 2025" },
+        { name: "Kateřina P.",       pts: 340, emoji: "🦹🏻‍♀️", since: "Květen 2025" },
+        { name: "Daniel Horák",      pts: 320, emoji: "🤵🏿",   since: "Květen 2025" },
+        { name: "Hana Kratochvílová", pts: 290, emoji: "🧑🏾‍🎨", since: "Květen 2025" },
+        { name: "Michal Doležal",    pts: 270, emoji: "🧑🏻‍🎤", since: "Květen 2025" },
+        { name: "Soňa Pokorná",      pts: 250, emoji: "👩🏼‍🚀", since: "Květen 2025" },
+        { name: "Robert Kučera",     pts: 240, emoji: "🧛🏻‍♂️", since: "Květen 2025" },
+        { name: "Tereza Vlčková",    pts: 210, emoji: "👩🏻‍🔬", since: "Květen 2025" },
+        { name: "Jakub Sedláček",    pts: 190, emoji: "🧑🏿‍🌾", since: "Květen 2025" },
+        { name: "Magdaléna B.",      pts: 170, emoji: "🧑🏾‍🎓", since: "Květen 2025" },
+        { name: "Vojtěch Mareček",   pts: 150, emoji: "👨🏿‍🎨", since: "Květen 2025" },
+        { name: "Iveta Šebková",     pts: 130, emoji: "👩🏼‍🦳", since: "Květen 2025" },
+        { name: "Lukáš Janků",       pts: 110, emoji: "👨🏽‍🚒", since: "Květen 2025" },
+        { name: "Nina Adamcová",     pts:  90, emoji: "👩🏿‍💻", since: "Květen 2025" }
+      ];
+
+      // Manažerské rozhraní – běhy a nováčci pod tímto manažerem.
+      // weekStatus: in-progress | pending (čeká na schválení) | approved | done (celá adaptace)
+      const COHORTS = [
+        {
+          id: "may-2025", label: "Květen 2025 (aktuální běh)",
+          newcomers: [
+            { name: "Martin Veselý (Ty)",  avatar: "auto", currentWeek: 7, totalWeeks: 12, pct: 53, weekStatus: "in-progress", me: true },
+            { name: "Lucie Svobodová",     avatar: "👩🏽‍💻", currentWeek: 7, totalWeeks: 12, pct: 58, weekStatus: "pending" },
+            { name: "Tomáš Dvořák",        avatar: "🥷🏻",   currentWeek: 6, totalWeeks: 12, pct: 45, weekStatus: "pending" },
+            { name: "Eva Marková",         avatar: "🧝🏼‍♂️", currentWeek: 7, totalWeeks: 12, pct: 50, weekStatus: "in-progress" },
+            { name: "Ondřej Bartoš",       avatar: "🧑🏽‍🏫", currentWeek: 5, totalWeeks: 12, pct: 38, weekStatus: "approved" },
+            { name: "Kateřina Pospíšilová",avatar: "🦹🏻‍♀️", currentWeek: 6, totalWeeks: 12, pct: 42, weekStatus: "in-progress" }
+          ]
+        },
+        {
+          id: "mar-2025", label: "Březen 2025",
+          newcomers: [
+            { name: "Jana Nováková",       avatar: "👩🏻‍💼", currentWeek: 10, totalWeeks: 12, pct: 82, weekStatus: "pending" },
+            { name: "Petr Krčmář",         avatar: "🧑🏼‍🍳", currentWeek: 10, totalWeeks: 12, pct: 75, weekStatus: "approved" },
+            { name: "Daniel Horák",        avatar: "🤵🏿",   currentWeek: 9,  totalWeeks: 12, pct: 70, weekStatus: "in-progress" },
+            { name: "Hana Kratochvílová",  avatar: "🧑🏾‍🎨", currentWeek: 10, totalWeeks: 12, pct: 78, weekStatus: "pending" }
+          ]
+        },
+        {
+          id: "jan-2025", label: "Leden 2025 (dokončený běh)",
+          newcomers: [
+            { name: "Adam Černý",          avatar: "🧑🏻‍🚀", currentWeek: 12, totalWeeks: 12, pct: 100, weekStatus: "done" },
+            { name: "Barbora Hájková",     avatar: "🦸🏽‍♀️", currentWeek: 12, totalWeeks: 12, pct: 100, weekStatus: "done" },
+            { name: "Marek Veselý",        avatar: "🧑🏽‍🏫", currentWeek: 12, totalWeeks: 12, pct:  95, weekStatus: "done" }
+          ]
+        }
+      ];
+
+      // =================================================================
+      // STATE
+      // =================================================================
+      const state = {
+        mode: "newcomer",          // newcomer | manager
+        cohortId: "may-2025",      // aktivní běh v manažerském rozhraní
+        view: "overview",          // overview | schedule (ovlivňuje POUZE levý sidebar)
+        currentWeek: 7,            // aktivní týden
+        expandedMonths: { 1: true, 2: true, 3: false },
+        selectedAvatar: Math.floor(Math.random() * AVATARS.length), // náhodný avatar jako default
+        avatarPickerOpen: false,
+        // Stavy úkolů: tasks[weekN] = [{done, feedbackGiven}]
+        tasks: {},
+        leaderboardView: "current",
+        challenge: "open",         // open | pending | approved
+        feedbackContext: null      // { weekN, idx } – aktuálně otevřený feedback úkol
+      };
+
+      // Inicializace stavu úkolů podle stavu týdne
+      Object.keys(TASKS_BY_WEEK).forEach((wk) => {
+        const w = Number(wk);
+        const status = WEEK_STATUS[w];
+        state.tasks[w] = TASKS_BY_WEEK[w].map((_, idx) => {
+          if (status === "done") return { done: true, feedbackGiven: true };
+          if (status === "failed") {
+            // Týden 5: většina úkolů zkusil, ale certifikaci nedal – takže done bez feedback
+            return { done: idx !== 1, feedbackGiven: idx !== 1 && idx !== 4 };
+          }
+          if (status === "current") {
+            // Aktuální týden: smíšený výchozí stav
+            // 0 = splněno + zpětná vazba předána, 1 = splněno bez ZV, 2 = splněno bez ZV,
+            // 3 = nesplněno, 4 = nesplněno
+            if (idx === 0) return { done: true, feedbackGiven: true };
+            if (idx === 1 || idx === 2) return { done: true, feedbackGiven: false };
+            return { done: false, feedbackGiven: false };
+          }
+          return { done: false, feedbackGiven: false };
+        });
+      });
+
+      // =================================================================
+      // RENDERING
+      // =================================================================
+
+      const overviewNav = document.getElementById("overviewNav");
+      const sidebarSchedule = document.getElementById("sidebarSchedule");
+      const mainContent = document.getElementById("mainContent");
+      const globalProgress = document.getElementById("globalProgress");
+      const globalPercent = document.getElementById("globalPercent");
+
+      function monthStatus(monthIdx) {
+        const monthWeeks = WEEKS.filter((w) => w.month === monthIdx);
+        const statuses = monthWeeks.map((w) => WEEK_STATUS[w.n]);
+        // Vše uzamčené → locked
+        if (statuses.every((s) => s === "locked")) return "locked";
+        // Aktuální nebo neaktivní zatím (current/locked) ale zatím není failed
+        const hasCurrent = statuses.includes("current");
+        const hasLocked = statuses.includes("locked");
+        const hasFailed = statuses.includes("failed");
+        // Spočítáme úkoly všech týdnů v měsíci, kde se očekávalo dokončení (past/current)
+        let allPastDone = true;
+        for (const w of monthWeeks) {
+          const st = WEEK_STATUS[w.n];
+          if (st === "locked") continue;
+          const tasks = state.tasks[w.n] || [];
+          if (tasks.some((t) => !t.done)) allPastDone = false;
+        }
+        // Pokud má failed týden nebo nedokončené úkoly v minulém/aktuálním → červená ✗
+        if (hasFailed || (!hasLocked && !hasCurrent && !allPastDone)) return "failed";
+        if (!hasFailed && !hasLocked && !hasCurrent && allPastDone) return "done";
+        if (hasCurrent && allPastDone && !hasFailed) return "current";
+        // Smíšený stav (např. aktuální týden + nedokončené úkoly + neuzavřený failed) → červená ✗
+        if (!allPastDone) return "failed";
+        return "current";
+      }
+
+      function statusGlyph(s) {
+        if (s === "done") return "✓";
+        if (s === "failed") return "✗";
+        if (s === "current") return "•";
+        return "🔒";
+      }
+
+      function renderOverviewNav() {
+        overviewNav.innerHTML = "";
+        const titles = ["První měsíc", "Druhý měsíc", "Třetí měsíc"];
+
+        for (let m = 1; m <= 3; m++) {
+          const ms = monthStatus(m);
+          const expanded = state.expandedMonths[m];
+          const monthAllLocked = WEEKS.filter((w) => w.month === m).every((w) => WEEK_STATUS[w.n] === "locked");
+
+          const btn = document.createElement("button");
+          btn.className = "nav-item" + (monthAllLocked ? " locked" : "");
+          btn.type = "button";
+          if (!monthAllLocked) {
+            btn.setAttribute("aria-expanded", String(expanded));
+          }
+
+          const statusEl = `<span class="month-status ${ms}" aria-hidden="true">${statusGlyph(ms)}</span>`;
+          const chev = monthAllLocked
+            ? `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+            : `<svg class="icon chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+          btn.innerHTML = `${statusEl}<span class="label">${titles[m - 1]}</span>${chev}`;
+          btn.addEventListener("click", () => {
+            if (monthAllLocked) return;
+            state.expandedMonths[m] = !state.expandedMonths[m];
+            renderOverviewNav();
+          });
+          overviewNav.appendChild(btn);
+
+          if (!monthAllLocked && expanded) {
+            const submenu = document.createElement("div");
+            submenu.className = "submenu";
+            WEEKS.filter((w) => w.month === m).forEach((w) => {
+              const st = WEEK_STATUS[w.n];
+              const link = document.createElement("button");
+              link.type = "button";
+              link.className = "week-link" + (state.currentWeek === w.n ? " active" : "") + (st === "locked" ? " locked" : "");
+              link.disabled = st === "locked";
+              link.innerHTML = `<span class="week-icon ${st}">${statusGlyph(st)}</span>${w.theme}`;
+              link.addEventListener("click", () => {
+                if (st === "locked") return;
+                state.currentWeek = w.n;
+                renderOverviewNav();
+                renderMain();
+              });
+              submenu.appendChild(link);
+            });
+            overviewNav.appendChild(submenu);
+          }
+        }
+      }
+
+      function renderMain() {
+        // Prostřední blok vždy zobrazuje seznam úkolů (požadavek 2)
+        mainContent.innerHTML = "";
+        renderHero();
+        renderTasks();
+        updateProgress();
+      }
+
+      function renderSidebarContent() {
+        // Levý sloupec se přepíná mezi přehledem měsíců a kompaktním rozvrhem aktuálního týdne.
+        if (state.view === "schedule") {
+          overviewNav.style.display = "none";
+          sidebarSchedule.style.display = "flex";
+          renderSidebarSchedule();
+        } else {
+          sidebarSchedule.style.display = "none";
+          overviewNav.style.display = "flex";
+          renderOverviewNav();
+        }
+      }
+
+      function renderSidebarSchedule() {
+        const week = WEEKS.find((w) => w.n === state.currentWeek);
+        const steps = [
+          {
+            cat: "self", icon: "📚", title: "Samostudium",
+            desc: 'Projdi si materiály k tématu „' + week.theme + '" v interní knihovně.',
+            linkLabel: "Otevřít knihovnu", linkIcon: "🔗"
+          },
+          {
+            cat: "webinar", icon: "🎥", title: "Webinář s koučem",
+            desc: "Online setkání s koučem k tématu týdne (cca 60 min).",
+            linkLabel: "Připojit přes Teams", linkIcon: "💬"
+          },
+          {
+            cat: "physical", icon: "🏫", title: "Prezenční den",
+            desc: "Společný den se skupinou v Akademii – nácvik a sdílení.",
+            linkLabel: "Detail dne", linkIcon: "📍"
+          },
+          {
+            cat: "branch", icon: "🏦", title: "Práce na pobočce",
+            desc: "Aplikace naučeného na pobočce – stínování a vlastní hovory.",
+            linkLabel: "Můj rozpis směn", linkIcon: "🗓️"
+          },
+          {
+            cat: "exam", icon: "🎓", title: "Studium na zkoušky",
+            desc: "Příprava na certifikaci ČBA – kurzy a testy.",
+            linkLabel: "Otevřít Educu", linkIcon: "🔗"
+          }
+        ];
+
+        let html = `<div class="sched-head">
+          <strong>${week.theme}</strong>
+          <span>5 kroků aktuálního týdne</span>
+        </div>`;
+        steps.forEach((s) => {
+          html += `<div class="step-card cat-${s.cat}">
+            <span class="step-icon" aria-hidden="true">${s.icon}</span>
+            <div class="step-body">
+              <span class="step-title">${s.title}</span>
+              <span class="step-desc">${s.desc}</span>
+              <a href="#" class="step-link" onclick="event.preventDefault();">${s.linkIcon} ${s.linkLabel}</a>
+            </div>
+          </div>`;
+        });
+        sidebarSchedule.innerHTML = html;
+      }
+
+      function renderHero() {
+        const week = WEEKS.find((w) => w.n === state.currentWeek);
+        const status = WEEK_STATUS[week.n];
+        const tasks = state.tasks[week.n] || [];
+        const done = tasks.filter((t) => t.done).length;
+        const total = tasks.length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+
+        const stateLabel = {
+          done: '<span class="task-tag" style="background: var(--success-soft); color: var(--success);">Týden dokončen ✓</span>',
+          failed: '<span class="task-tag" style="background: var(--danger-soft); color: var(--danger);">Týden nedokončen ✗</span>',
+          current: '<span class="task-tag" style="background: var(--primary-soft); color: var(--primary);">Aktuální týden</span>',
+          locked: '<span class="task-tag">Uzamčeno 🔒</span>'
+        }[status];
+
+        const card = document.createElement("section");
+        card.className = "card hero";
+        card.innerHTML = `
+          <div>
+            <h1>Týden ${week.n}</h1>
+            <div class="week-theme">${week.theme}</div>
+            ${stateLabel ? `<div style="margin-bottom: 12px;">${stateLabel}</div>` : ""}
+            <p class="lead">${week.desc}</p>
+            <div class="hero-progress">
+              <div class="progress-meta">
+                <span>Průběh týdne</span>
+                <strong>${pct} %</strong>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width: ${pct}%"></div>
+              </div>
+              <p class="summary">Dokončeno ${done} z ${total} úkolů týdne</p>
+            </div>
+          </div>
+          <div class="hero-art" style="background: ${week.gradient};" aria-hidden="true">
+            <span class="hero-emoji">${week.emoji}</span>
+          </div>
+        `;
+        mainContent.appendChild(card);
+      }
+
+      function renderTasks() {
+        const week = WEEKS.find((w) => w.n === state.currentWeek);
+        const status = WEEK_STATUS[week.n];
+        const tasksDef = TASKS_BY_WEEK[week.n] || [];
+        const tasksState = state.tasks[week.n] || [];
+
+        const wrap = document.createElement("section");
+        wrap.setAttribute("aria-labelledby", "tasksTitle");
+        wrap.innerHTML = `<h2 class="section-title" id="tasksTitle">Hlavní úkoly týdne</h2>`;
+
+        if (status === "locked") {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.innerHTML = `<div style="font-size:2rem;margin-bottom:8px;">🔒</div>
+            <strong>Tento týden je zatím uzamčen.</strong>
+            <p style="margin-top:6px;">Otevře se ti, jakmile bude jeho čas v adaptační ose.</p>`;
+          wrap.appendChild(empty);
+          mainContent.appendChild(wrap);
+          return;
+        }
+
+        const list = document.createElement("div");
+        list.className = "task-list";
+
+        const priority = PRIORITY_TASKS[week.n] || [];
+
+        tasksDef.forEach(([title, subtitle, tag, icon], idx) => {
+          const t = tasksState[idx];
+          const isDone = t.done;
+          const fbGiven = t.feedbackGiven;
+          const isPriority = priority.includes(idx);
+
+          const card = document.createElement("article");
+          card.className = "task-card" + (isDone ? " done" : "");
+
+          let feedbackBtn;
+          if (fbGiven) {
+            feedbackBtn = `<button class="btn btn-success" type="button" disabled>
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Zpětná vazba předána (+1 bod)
+            </button>`;
+          } else if (isDone) {
+            feedbackBtn = `<button class="btn btn-primary" type="button" data-feedback="${idx}">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
+              Předat zpětnou vazbu (+1 bod)
+            </button>`;
+          } else {
+            feedbackBtn = `<button class="btn btn-disabled" type="button" disabled title="Nejprve dokonči úkol">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
+              Předat zpětnou vazbu (+1 bod)
+            </button>`;
+          }
+
+          const priorityHtml = isPriority
+            ? `<span class="priority-tag">
+                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                 Priorita
+               </span>`
+            : "";
+
+          card.innerHTML = `
+            <div class="task-icon">${icon}</div>
+            <div class="task-body">
+              <div class="task-head">
+                <span class="task-title">${title}</span>
+                <span class="task-tag">${tag}</span>
+                ${priorityHtml}
+              </div>
+              <p class="task-subtitle">${subtitle}</p>
+              <div class="task-actions">
+                ${feedbackBtn}
+                <span class="points-tag">+${tag === "AI" ? 5 : (tag === "Aplikace školení" ? 15 : 10)} bodů</span>
+              </div>
+            </div>
+            <button class="check-square ${isDone ? "checked" : ""}" type="button" role="checkbox"
+              aria-checked="${isDone}" aria-label="Označit úkol jako dokončený" data-task="${idx}">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          `;
+
+          card.querySelector(".check-square").addEventListener("click", () => toggleTask(week.n, idx));
+          const fb = card.querySelector("[data-feedback]");
+          if (fb) fb.addEventListener("click", () => openFeedbackModal(week.n, idx));
+
+          list.appendChild(card);
+        });
+
+        wrap.appendChild(list);
+        mainContent.appendChild(wrap);
+      }
+
+      // (renderSchedule odstraněn – rozvrh se vykresluje v levém sidebaru, viz renderSidebarSchedule)
+
+      function toggleTask(weekN, idx) {
+        const t = state.tasks[weekN][idx];
+        t.done = !t.done;
+        if (!t.done) t.feedbackGiven = false; // reset zpětné vazby při odškrtnutí
+        renderMain();
+        renderSidebarContent();
+        renderLeaderboard();
+      }
+
+      function openFeedbackModal(weekN, idx) {
+        const week = WEEKS.find((w) => w.n === weekN);
+        const task = TASKS_BY_WEEK[weekN][idx];
+        state.feedbackContext = { weekN, idx };
+        document.getElementById("feedbackTitle").textContent = `Zpětná vazba k úkolu`;
+        document.getElementById("feedbackTaskInfo").innerHTML =
+          `Úkol: <strong>${task[0]}</strong> (${week.theme}). Napiš pár vět o tom, co ti dalo a co bylo náročné. Odměna: <strong>+1 bod</strong>.`;
+        document.getElementById("feedbackText").value = "";
+        document.getElementById("feedbackModal").classList.add("open");
+        setTimeout(() => document.getElementById("feedbackText").focus(), 100);
+      }
+
+      function submitFeedback() {
+        const ctx = state.feedbackContext;
+        if (!ctx) return;
+        const text = document.getElementById("feedbackText").value.trim();
+        if (!text) {
+          document.getElementById("feedbackText").focus();
+          return;
+        }
+        state.tasks[ctx.weekN][ctx.idx].feedbackGiven = true;
+        state.feedbackContext = null;
+        document.getElementById("feedbackModal").classList.remove("open");
+        renderMain();
+        renderSidebarContent();
+        renderLeaderboard();
+        const toast = document.getElementById("toast");
+        toast.textContent = "Zpětná vazba odeslána (+1 bod) ✓";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2400);
+      }
+
+      function updateProgress() {
+        // Celkový pokrok = za 12 týdnů (3 měsíce)
+        let totalTasks = 0, doneTasks = 0;
+        for (let w = 1; w <= 12; w++) {
+          const tt = state.tasks[w] || [];
+          totalTasks += tt.length;
+          doneTasks += tt.filter((t) => t.done).length;
+        }
+        const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
+        globalProgress.style.width = pct + "%";
+        globalPercent.textContent = pct + " %";
+      }
+
+      // =================================================================
+      // AVATAR PICKER
+      // =================================================================
+      function renderAvatarGrid() {
+        const grid = document.getElementById("avatarGrid");
+        grid.innerHTML = "";
+        AVATARS.forEach((emoji, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "avatar-option" + (state.selectedAvatar === i ? " active" : "");
+          btn.textContent = emoji;
+          btn.setAttribute("aria-label", `Avatar ${i + 1}`);
+          btn.addEventListener("click", () => {
+            state.selectedAvatar = i;
+            updateProfileAvatar();
+            renderAvatarGrid();
+            renderLeaderboard(); // propsání avatara do žebříčku
+          });
+          grid.appendChild(btn);
+        });
+      }
+
+      function updateProfileAvatar() {
+        const av = document.getElementById("profileAvatar");
+        // Vždy zobrazujeme avatar (žádné iniciály) – default je vylosován v initu
+        const idx = state.selectedAvatar ?? 0;
+        av.textContent = AVATARS[idx];
+        av.style.background = "var(--surface-soft)";
+        av.style.fontSize = "3rem";
+      }
+
+      document.getElementById("myDetailBtn").addEventListener("click", () => {
+        state.avatarPickerOpen = !state.avatarPickerOpen;
+        const picker = document.getElementById("avatarPicker");
+        picker.classList.toggle("open", state.avatarPickerOpen);
+        document.getElementById("myDetailBtn").setAttribute("aria-expanded", String(state.avatarPickerOpen));
+      });
+
+      // =================================================================
+      // VIEW SWITCH
+      // =================================================================
+      document.getElementById("viewSwitch").querySelectorAll("button").forEach((b) => {
+        b.addEventListener("click", () => {
+          document.getElementById("viewSwitch").querySelectorAll("button").forEach((o) => {
+            o.classList.remove("active");
+            o.setAttribute("aria-selected", "false");
+          });
+          b.classList.add("active");
+          b.setAttribute("aria-selected", "true");
+          state.view = b.dataset.view;
+          // Přepínání ovlivňuje POUZE levý sloupec, prostřední blok zůstává.
+          renderSidebarContent();
+        });
+      });
+
+      // =================================================================
+      // LEADERBOARD
+      // =================================================================
+      function renderLeaderboard() {
+        const data = state.leaderboardView === "current" ? LB_CURRENT : LB_HISTORY;
+        const table = document.getElementById("leaderboardTable");
+        const showHistoryNote = state.leaderboardView === "history";
+        const myAvatar = AVATARS[state.selectedAvatar ?? 0];
+        let html = `<div class="lb-head"><span>POŘADÍ</span><span>NOVÁČEK</span><span class="right-col">BODY</span></div>`;
+        data.forEach((row) => {
+          const av = row.me
+            ? `<span class="lb-avatar" style="background: var(--primary-soft); font-size:1.05rem;">${myAvatar}</span>`
+            : `<span class="lb-avatar">${row.emoji}</span>`;
+          const note = showHistoryNote && row.note ? `<span style="display:block;font-size:0.7rem;color:var(--text-muted);font-weight:400;">${row.note}</span>` : "";
+          const ptsColor = row.pos <= 3 ? "color: var(--primary);" : "color: var(--text-soft);";
+          html += `<div class="lb-row ${row.me ? "me" : ""}">
+            <span class="lb-pos" style="${row.pos > 3 ? "color: var(--text-muted);" : ""}">${row.pos}</span>
+            <span class="lb-name">${av}<span>${row.name}${note}</span></span>
+            <span class="lb-points" style="${ptsColor}">${row.pts}</span>
+          </div>`;
+        });
+        table.innerHTML = html;
+      }
+
+      function renderFullLeaderboard() {
+        const myAvatar = AVATARS[state.selectedAvatar ?? 0];
+        const sorted = [...LB_FULL].sort((a, b) => b.pts - a.pts);
+        let html = `<div class="lb-head"><span>POŘADÍ</span><span>NOVÁČEK</span><span class="right-col">BODY</span></div>`;
+        sorted.forEach((row, i) => {
+          const pos = i + 1;
+          const av = row.me
+            ? `<span class="lb-avatar" style="background: var(--primary-soft); font-size:1.05rem;">${myAvatar}</span>`
+            : `<span class="lb-avatar">${row.emoji}</span>`;
+          const note = `<span style="display:block;font-size:0.7rem;color:var(--text-muted);font-weight:400;">Nástup ${row.since}</span>`;
+          const ptsColor = pos <= 3 ? "color: var(--primary);" : "color: var(--text-soft);";
+          html += `<div class="lb-row ${row.me ? "me" : ""}">
+            <span class="lb-pos" style="${pos > 3 ? "color: var(--text-muted);" : ""}">${pos}</span>
+            <span class="lb-name">${av}<span>${row.name}${note}</span></span>
+            <span class="lb-points" style="${ptsColor}">${row.pts}</span>
+          </div>`;
+        });
+        document.getElementById("fullLbTable").innerHTML = html;
+      }
+
+      document.getElementById("leaderboardSwitch").querySelectorAll("button").forEach((b) => {
+        b.addEventListener("click", () => {
+          document.getElementById("leaderboardSwitch").querySelectorAll("button").forEach((o) => {
+            o.classList.remove("active");
+            o.setAttribute("aria-selected", "false");
+          });
+          b.classList.add("active");
+          b.setAttribute("aria-selected", "true");
+          state.leaderboardView = b.dataset.lb;
+          renderLeaderboard();
+        });
+      });
+
+      // =================================================================
+      // POKE MODAL
+      // =================================================================
+      const pokeModal = document.getElementById("pokeModal");
+      const pokeSelect = document.getElementById("pokeColleague");
+      const pokeMsg = document.getElementById("pokeMessage");
+      COLLEAGUES.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.name;
+        opt.textContent = `${c.emoji}  ${c.name} – ${c.role}`;
+        pokeSelect.appendChild(opt);
+      });
+
+      document.getElementById("pokeBtn").addEventListener("click", () => {
+        pokeModal.classList.add("open");
+      });
+      document.querySelectorAll("[data-close]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.getElementById(btn.dataset.close).classList.remove("open");
+        });
+      });
+      pokeModal.addEventListener("click", (e) => {
+        if (e.target === pokeModal) pokeModal.classList.remove("open");
+      });
+
+      document.getElementById("pokeSendBtn").addEventListener("click", () => {
+        const colleague = pokeSelect.value;
+        const msg = pokeMsg.value.trim();
+        if (!colleague) return;
+        pokeModal.classList.remove("open");
+        pokeMsg.value = "";
+        const toast = document.getElementById("toast");
+        toast.textContent = `Šťouchnutí pro ${colleague.split(" ")[0]} odesláno ✓`;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2400);
+      });
+
+      // =================================================================
+      // FEEDBACK MODAL
+      // =================================================================
+      const feedbackModal = document.getElementById("feedbackModal");
+      document.getElementById("feedbackSendBtn").addEventListener("click", submitFeedback);
+      feedbackModal.addEventListener("click", (e) => {
+        if (e.target === feedbackModal) feedbackModal.classList.remove("open");
+      });
+
+      // =================================================================
+      // FULL LEADERBOARD MODAL
+      // =================================================================
+      const fullLbModal = document.getElementById("fullLbModal");
+      document.getElementById("lbFullLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        renderFullLeaderboard();
+        fullLbModal.classList.add("open");
+      });
+      fullLbModal.addEventListener("click", (e) => {
+        if (e.target === fullLbModal) fullLbModal.classList.remove("open");
+      });
+
+      // =================================================================
+      // MĚSÍČNÍ VÝZVA – flow open → pending → approved
+      // =================================================================
+      function renderChallenge() {
+        const card = document.getElementById("challengeCard");
+        const btn = document.getElementById("challengeBtn");
+        const target = document.getElementById("challengeTarget");
+        const desc = document.getElementById("challengeDesc");
+        if (state.challenge === "open") {
+          card.dataset.state = "open";
+          card.style.background = "";
+          target.textContent = "🎯";
+          desc.innerHTML = "Navolat 100 schůzek";
+          btn.style.display = "";
+          btn.disabled = false;
+          btn.className = "btn btn-primary";
+          btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Dokončil jsem`;
+        } else if (state.challenge === "pending") {
+          card.dataset.state = "pending";
+          card.style.background = "var(--warn-soft)";
+          target.textContent = "⏳";
+          desc.innerHTML = `Navolat 100 schůzek<br><span style="color:var(--warn);font-size:0.78rem;font-weight:600;">Čeká na schválení tvého TL…</span>`;
+          btn.style.display = "";
+          btn.disabled = true;
+          btn.className = "btn btn-disabled";
+          btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Odesláno ke kontrole`;
+        } else {
+          card.dataset.state = "approved";
+          card.style.background = "var(--success-soft)";
+          target.textContent = "✅";
+          desc.innerHTML = `Navolat 100 schůzek<br><span style="color:var(--success);font-size:0.78rem;font-weight:600;">Schváleno tvým TL · +50 bodů</span>`;
+          btn.style.display = "none";
+        }
+      }
+
+      document.getElementById("challengeBtn").addEventListener("click", () => {
+        if (state.challenge !== "open") return;
+        state.challenge = "pending";
+        renderChallenge();
+        const toast = document.getElementById("toast");
+        toast.textContent = "Výzva odeslána ke schválení nadřízenému ✓";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2200);
+        // Mock: TL schválí za 3 vteřiny
+        setTimeout(() => {
+          if (state.challenge === "pending") {
+            state.challenge = "approved";
+            renderChallenge();
+            const t = document.getElementById("toast");
+            t.textContent = "Tvá výzva byla schválena 🎉";
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2400);
+          }
+        }, 3000);
+      });
+
+      // =================================================================
+      // MANAŽERSKÉ ROZHRANÍ
+      // =================================================================
+      const cohortSelect = document.getElementById("cohortSelect");
+      COHORTS.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.label;
+        cohortSelect.appendChild(opt);
+      });
+
+      function getCohort() {
+        return COHORTS.find((c) => c.id === state.cohortId) || COHORTS[0];
+      }
+
+      function newcomerWeekLabel(nc) {
+        const idx = nc.currentWeek - 1;
+        const wk = WEEKS[idx];
+        return wk ? `${nc.currentWeek}. týden · ${wk.theme}` : `${nc.currentWeek}. týden`;
+      }
+
+      function renderManagerSummary() {
+        const c = getCohort();
+        const total = c.newcomers.length;
+        const pending = c.newcomers.filter((n) => n.weekStatus === "pending").length;
+        const approved = c.newcomers.filter((n) => n.weekStatus === "approved").length;
+        const done = c.newcomers.filter((n) => n.weekStatus === "done").length;
+        const avgPct = Math.round(c.newcomers.reduce((s, n) => s + n.pct, 0) / total);
+        const html = `
+          <div class="summary-card"><span class="label">Nováčků v běhu</span><span class="value">${total}</span></div>
+          <div class="summary-card ${pending ? "warn" : ""}"><span class="label">Čeká na schválení</span><span class="value">${pending}</span></div>
+          <div class="summary-card good"><span class="label">Schváleno týdnů</span><span class="value">${approved + done}</span></div>
+          <div class="summary-card"><span class="label">Průměrný pokrok</span><span class="value">${avgPct} %</span></div>
+        `;
+        document.getElementById("mgrSummary").innerHTML = html;
+      }
+
+      function renderNewcomers() {
+        const c = getCohort();
+        const myAvatar = AVATARS[state.selectedAvatar ?? 0];
+        const list = document.getElementById("newcomersList");
+        list.innerHTML = "";
+
+        c.newcomers.forEach((nc, idx) => {
+          const avatar = nc.avatar === "auto" ? myAvatar : nc.avatar;
+          let stateHtml = "", actionHtml = "";
+          if (nc.weekStatus === "pending") {
+            stateHtml = `<span class="nc-state pending">⏳ Čeká na schválení týdne ${nc.currentWeek}</span>`;
+            actionHtml = `<button class="approve" type="button" data-approve="${idx}">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Schválit týden ${nc.currentWeek}
+            </button>`;
+          } else if (nc.weekStatus === "approved") {
+            stateHtml = `<span class="nc-state approved">✓ Týden ${nc.currentWeek} schválen</span>`;
+            actionHtml = `<button class="ghost" type="button" disabled>Bez akce</button>`;
+          } else if (nc.weekStatus === "done") {
+            stateHtml = `<span class="nc-state done">🎉 Adaptace dokončena</span>`;
+            actionHtml = `<button class="ghost" type="button" disabled>Bez akce</button>`;
+          } else {
+            stateHtml = `<span class="nc-state in-progress">⋯ Pracuje na týdnu ${nc.currentWeek}</span>`;
+            actionHtml = `<button class="ghost" type="button" disabled>Čekej na dokončení</button>`;
+          }
+
+          const card = document.createElement("article");
+          card.className = "newcomer-card";
+          card.innerHTML = `
+            <div class="nc-avatar">${avatar}</div>
+            <div class="nc-info">
+              <div class="nc-name">${nc.name}</div>
+              <div class="nc-meta">Běh ${c.label}</div>
+              <span class="nc-week-tag">${newcomerWeekLabel(nc)}</span>
+            </div>
+            <div class="nc-progress">
+              <div class="meta"><span>Pokrok adaptace</span><strong>${nc.pct} %</strong></div>
+              <div class="track"><div class="fill" style="width:${nc.pct}%"></div></div>
+              <div class="meta"><span>Týden ${nc.currentWeek} / ${nc.totalWeeks}</span></div>
+            </div>
+            <div class="nc-action">
+              ${stateHtml}
+              ${actionHtml}
+            </div>
+          `;
+          const ap = card.querySelector("[data-approve]");
+          if (ap) ap.addEventListener("click", () => approveNewcomerWeek(idx));
+          list.appendChild(card);
+        });
+      }
+
+      function approveNewcomerWeek(idx) {
+        const c = getCohort();
+        const nc = c.newcomers[idx];
+        if (!nc || nc.weekStatus !== "pending") return;
+        nc.weekStatus = "approved";
+        renderManagerSummary();
+        renderNewcomers();
+        const toast = document.getElementById("toast");
+        toast.textContent = `Schválen týden ${nc.currentWeek} pro ${nc.name.split(" ")[0]} ✓`;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2400);
+      }
+
+      function renderManager() {
+        renderManagerSummary();
+        renderNewcomers();
+      }
+
+      cohortSelect.addEventListener("change", (e) => {
+        state.cohortId = e.target.value;
+        renderManager();
+      });
+
+      // =================================================================
+      // PŘEPÍNAČ ROZHRANÍ Nováček ↔ Manažer
+      // =================================================================
+      document.getElementById("modeSwitch").querySelectorAll("button").forEach((b) => {
+        b.addEventListener("click", () => {
+          document.getElementById("modeSwitch").querySelectorAll("button").forEach((o) => {
+            o.classList.remove("active");
+            o.setAttribute("aria-selected", "false");
+          });
+          b.classList.add("active");
+          b.setAttribute("aria-selected", "true");
+          state.mode = b.dataset.mode;
+          document.body.classList.toggle("mode-manager", state.mode === "manager");
+          if (state.mode === "manager") renderManager();
+        });
+      });
+
+      // =================================================================
+      // INIT
+      // =================================================================
+      updateProfileAvatar();
+      renderAvatarGrid();
+      renderSidebarContent();
+      renderMain();
+      renderLeaderboard();
+      renderChallenge();
+      renderManager();
+    </script>
+  </body>
+</html>
